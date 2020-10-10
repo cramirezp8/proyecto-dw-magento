@@ -19,6 +19,8 @@ section.pricing {
     font-size: 0.9rem;
     letter-spacing: .1rem;
     font-weight: bold;
+    color: #F24516!important;
+    background-color: #F24516!important;
 }
 
 .pricing .card-price {
