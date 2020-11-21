@@ -1,4 +1,6 @@
 var express = require('express');
+var Category = require("../models/category");
+var Post = require("../models/post");
 var bodyParser = require('body-parser');
 var cors = require('cors');
 var app = express();
@@ -7,56 +9,33 @@ app.use(cors()); //Permita peticiones de otros origenes
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
-var usuarios = [];
 
-app.get('/', function(req, res) {
-    res.send("Peticion recibida");
+router.get('/category', function(req, res, next) {
+    Category.find(function(err, categories) {
+        if (err) return next(err);
+        res.json(categories);
+    });
 });
 
-//Crear un usuario
-app.post('/usuarios', function(req, res) {
-    let usuario = {
-        nombre: req.body.nombre,
-        apellido: req.body.apellido,
-        fechaNacimiento: req.body.fechaNacimiento,
-        pais: req.body.pais
-    }
-
-    usuarios.push(usuario);
-    res.send({ codigoResultado: 1, mensaje: 'Registro guardado', usuarioGuardado: usuario });
-});
-//Obtener un usuario
-app.get('/usuarios/:id', function(req, res) {
-    if (req.params.id > (usuarios.length - 1))
-        res.send({ codigoResultado: 0, mensaje: "Usuario no existe" });
-    else
-        res.send(usuarios[req.params.id]);
+router.get('/bycategory/:id', function(req, res, next) {
+    Post.find({ category: req.params.id }, function(err, posts) {
+        if (err) return next(err);
+        res.json(posts);
+    });
 });
 
-//Obtener todos los usuarios
-app.get('/usuarios', function(req, res) {
-    res.send(usuarios);
+router.get('/post', function(req, res, next) {
+    Post.find(function(err, posts) {
+        if (err) return next(err);
+        res.json(posts);
+    });
 });
 
-//Actualizar un usuario
-app.put('/usuarios/:id', function(req, res) {
-    let usuario = {
-        nombre: req.body.nombre,
-        apellido: req.body.apellido,
-        fechaNacimiento: req.body.fechaNacimiento,
-        pais: req.body.pais
-    }
-
-    usuarios[req.params.id] = usuario;
-    res.send({ codigoResultado: 1, mensaje: "Usuario actualizado" });
+router.get('/post/:id', function(req, res, next) {
+    Post.findById(req.params.id, function(err, post) {
+        if (err) return next(err);
+        res.json(post);
+    });
 });
 
-//Eliminar un usuario
-app.delete('/usuarios/:id', function(req, res) {
-    usuarios.splice(req.params.id, 1);
-    res.send({ codigoResultado: 1, mensaje: "Usuario eliminado" });
-});
-
-app.listen(8888, function() {
-    console.log("Servidor levantado");
-});
+module.exports = router;
