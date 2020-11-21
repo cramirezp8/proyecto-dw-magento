@@ -1,41 +1,33 @@
+var mongoose = require('mongoose');
+
+mongoose.connect('mongodb://localhost:27017/blog-cms', {
+        promiseLibrary: require('bluebird'),
+        useNewUrlParser: true,
+        useUnifiedTopology: true,
+        useCreateIndex: true
+    }).then(() => console.log('Mongodb connection successful'))
+    .catch((err) => console.error(err));
 var express = require('express');
-var Category = require("../models/category");
-var Post = require("../models/post");
-var bodyParser = require('body-parser');
-var cors = require('cors');
+const cors = require('cors');
+const bodyParser = require('body-parser');
+
 var app = express();
-
-app.use(cors()); //Permita peticiones de otros origenes
-app.use(bodyParser.json());
+//Middleware for CORS
+app.use(cors());
+//Middleware for bodyparsing using both json and urlencoding
 app.use(bodyParser.urlencoded({ extended: true }));
+app.use(bodyParser.json());
 
+var passport = require('passport');
+var auth = require('./routes/auth');
+var category = require('./routes/category');
+var post = require('./routes/post');
 
-router.get('/category', function(req, res, next) {
-    Category.find(function(err, categories) {
-        if (err) return next(err);
-        res.json(categories);
-    });
+app.use(passport.initialize());
+app.use('/api/auth', auth);
+app.use('/api/category', category);
+app.use('/api/post', post);
+
+app.listen(3000, (err, res) => {
+    console.log(`Server Started on Port 3000`)
 });
-
-router.get('/bycategory/:id', function(req, res, next) {
-    Post.find({ category: req.params.id }, function(err, posts) {
-        if (err) return next(err);
-        res.json(posts);
-    });
-});
-
-router.get('/post', function(req, res, next) {
-    Post.find(function(err, posts) {
-        if (err) return next(err);
-        res.json(posts);
-    });
-});
-
-router.get('/post/:id', function(req, res, next) {
-    Post.findById(req.params.id, function(err, post) {
-        if (err) return next(err);
-        res.json(post);
-    });
-});
-
-module.exports = router;
